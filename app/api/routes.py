@@ -153,6 +153,7 @@ _UI_HTML = r"""
           <span class="chip">Özel hukuk: kural tabanlı</span>
           <span class="chip">Ceza: açıklanabilir puanlama</span>
           <span class="chip">Atıf: yalnız DB</span>
+          <span class="chip">UI build: v3</span>
         </div>
       </div>
 
@@ -354,8 +355,10 @@ function renderWarnings(data){
   warnings.innerHTML = ws.map(w => `<div class="warn">• ${esc(w)}</div>`).join("");
 }
 
+// ✅ Response'u önce text okuyup JSON parse etmeyi dene.
+// JSON değilse (Internal Server Error gibi) ekrana bas.
 async function readResponse(res){
-  const txt = await res.text();  // önce text
+  const txt = await res.text();
   try{
     return { ok: res.ok, status: res.status, data: JSON.parse(txt), raw: txt };
   }catch{
@@ -378,13 +381,13 @@ async function analyze(){
   const f = document.getElementById("file").files[0];
 
   try{
+    // ✅ Dosyalı istek
     if (f){
       const fd = new FormData();
       fd.append("file", f);
       fd.append("dava_turu", dava_turu);
       fd.append("olay_ozeti", olay);
 
-      // ✅ kesin endpoint (relative karışmasın)
       let res = await fetch("/api/upload_analyze", { method:"POST", body: fd });
       if (!res.ok){
         res = await fetch("/api/analyze_pdf", { method:"POST", body: fd });
@@ -405,6 +408,7 @@ async function analyze(){
       return;
     }
 
+    // ✅ Metinle istek
     const payload = {
       dava_turu: dava_turu,
       olay_ozeti: olay,
@@ -450,6 +454,7 @@ def home():
 
 @router.get("/web", response_class=HTMLResponse)
 def web_form():
+    # UI her zaman buradan geliyor
     return _UI_HTML
 
 @router.post("/analyze", response_model=AnalyzeResponse)
