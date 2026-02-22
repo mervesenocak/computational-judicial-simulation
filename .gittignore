@@ -1,0 +1,5 @@
+# Local environment
+.venv/
+hakim.db
+*.log
+hakim_simulasyonu.egg-info/

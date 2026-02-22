@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import HTMLResponse, StreamingResponse
 
@@ -279,8 +277,8 @@ function renderKPI(data){
   const kpi = document.getElementById("kpi");
   kpi.innerHTML = "";
   const scores = data.scores || {};
-  const toplam = scores.toplam_puan ?? "—";
-  const oneri = scores.onerilen_sonuc ?? "—";
+  const toplam = (scores && scores.toplam_puan !== undefined) ? scores.toplam_puan : "—";
+  const oneri  = (scores && scores.onerilen_sonuc !== undefined) ? scores.onerilen_sonuc : "—";
   const citCount = (data.citations || []).length;
 
   const items = [
@@ -356,6 +354,21 @@ function renderWarnings(data){
   warnings.innerHTML = ws.map(w => `<div class="warn">• ${esc(w)}</div>`).join("");
 }
 
+async function readResponse(res){
+  const txt = await res.text();  // önce text
+  try{
+    return { ok: res.ok, status: res.status, data: JSON.parse(txt), raw: txt };
+  }catch{
+    return { ok: res.ok, status: res.status, data: null, raw: txt };
+  }
+}
+
+function showError(msg){
+  document.getElementById("outWrap").style.display = "grid";
+  document.getElementById("warnCard").style.display = "block";
+  document.getElementById("warnings").innerHTML = `<div class="err">Hata: ${esc(msg)}</div>`;
+}
+
 async function analyze(){
   setBusy(true);
   document.getElementById("outWrap").style.display = "none";
@@ -371,18 +384,24 @@ async function analyze(){
       fd.append("dava_turu", dava_turu);
       fd.append("olay_ozeti", olay);
 
-      let res = await fetch("upload_analyze", { method:"POST", body: fd });
+      // ✅ kesin endpoint (relative karışmasın)
+      let res = await fetch("/api/upload_analyze", { method:"POST", body: fd });
       if (!res.ok){
-        res = await fetch("analyze_pdf", { method:"POST", body: fd });
+        res = await fetch("/api/analyze_pdf", { method:"POST", body: fd });
       }
-      const data = await res.json();
+
+      const rr = await readResponse(res);
+      if(!rr.ok || !rr.data){
+        throw new Error(`API ${rr.status}: ${rr.raw || "Bilinmeyen hata"}`);
+      }
+
+      const data = rr.data;
       renderKPI(data);
       renderScores(data);
       renderCitations(data);
       renderWarnings(data);
       document.getElementById("decision").textContent = data.decision_text || "";
       document.getElementById("outWrap").style.display = "grid";
-      setBusy(false);
       return;
     }
 
@@ -396,13 +415,18 @@ async function analyze(){
       ek_bilgiler: null
     };
 
-    const res = await fetch("analyze", {
+    const res = await fetch("/api/analyze", {
       method:"POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json();
+    const rr = await readResponse(res);
+    if(!rr.ok || !rr.data){
+      throw new Error(`API ${rr.status}: ${rr.raw || "Bilinmeyen hata"}`);
+    }
+
+    const data = rr.data;
     renderKPI(data);
     renderScores(data);
     renderCitations(data);
@@ -410,9 +434,7 @@ async function analyze(){
     document.getElementById("decision").textContent = data.decision_text || "";
     document.getElementById("outWrap").style.display = "grid";
   } catch(e){
-    document.getElementById("outWrap").style.display = "grid";
-    document.getElementById("warnCard").style.display = "block";
-    document.getElementById("warnings").innerHTML = `<div class="err">Hata: ${esc(e.message || e)}</div>`;
+    showError(e?.message || String(e));
   } finally {
     setBusy(false);
   }
@@ -424,12 +446,10 @@ async function analyze(){
 
 @router.get("/", response_class=HTMLResponse)
 def home():
-    # Bu endpoint /api/ olur
     return "<h3>Hakim Simülasyonu ✅</h3><p><a href='/api/web'>UI</a> • <a href='/docs'>Swagger</a></p>"
 
 @router.get("/web", response_class=HTMLResponse)
 def web_form():
-    # Bu endpoint /api/web olur
     return _UI_HTML
 
 @router.post("/analyze", response_model=AnalyzeResponse)
