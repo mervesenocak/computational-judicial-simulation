@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Hakim Simülasyonu</title>
+  <link rel="stylesheet" href="/static/app.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <div>
+        <h1 class="h1">Hakim Simülasyonu</h1>
+        <p class="sub">
+          Denetlenebilir (audit edilebilir) prototip • <b>Uydurma atıf üretmez</b> • Bu hukuki tavsiye değildir.
+        </p>
+        <div class="badges">
+          <span class="badge">Özel hukuk: mevzuat/ictihat çizgisinden sapmadan</span>
+          <span class="badge">Ceza: takdir puanlama modeli (açıklanabilir)</span>
+          <span class="badge">Amaç: eğitim/portföy</span>
+        </div>
+      </div>
+      <div class="card" style="min-width:280px">
+        <div class="label">Hızlı linkler</div>
+        <div class="btns" style="margin-top:8px">
+          <a class="btn secondary" href="/docs">Swagger</a>
+          <a class="btn secondary" href="/openapi.json">OpenAPI</a>
+        </div>
+        <div class="hr"></div>
+        <div class="small">
+          Not: PDF tarama ise metin çıkarımı başarısız olabilir. (OCR sonraki adım)
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <form action="/api/web_analyze" method="post" enctype="multipart/form-data">
+        <div class="grid">
+          <div>
+            <p class="label">Dava Türü</p>
+            <select name="dava_turu">
+              <option value="ozel">Özel Hukuk</option>
+              <option value="ceza">Ceza</option>
+            </select>
+            <p class="small">İstersen seç, istersen sistem metinden de tahmin edebilir (sonraki adım).</p>
+          </div>
+
+          <div>
+            <p class="label">Dosya (PDF / DOCX)</p>
+            <input type="file" name="file" accept=".pdf,.docx,.txt"/>
+            <p class="small">İstersen dosya yükle, istersen aşağıya metin yapıştır.</p>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <p class="label">Olay Özeti / Metin</p>
+        <textarea name="olay_ozeti" placeholder="Örn: Davacı, davalının kusurlu davranışı nedeniyle zarar..."></textarea>
+
+        <div class="btns">
+          <button class="btn primary" type="submit">Analiz Et</button>
+          <button class="btn" type="reset">Temizle</button>
+        </div>
+
+        <div class="hr"></div>
+        <div class="small">Bu uygulama eğitim/portföy amaçlıdır. Hukuki tavsiye değildir.</div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hakim-simulasyonu"
+version = "0.1.0"
+description = "Denetlenebilir (audit edilebilir) kurallı hakim simülasyonu prototipi"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "pydantic>=2.6",
+  "pydantic-settings>=2.2",
+  "SQLAlchemy>=2.0",
+  "python-multipart>=0.0.9",
+  "jinja2>=3.1",
+  "rank-bm25>=0.2.2",
+  "numpy>=1.26",
+  "python-docx>=1.1.0",
+  "pypdf>=4.0.0",
+  "reportlab>=4.0.0",
+  "openai>=1.0.0",
+  "python-dotenv>=1.0.0"
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[tool.setuptools]
+packages = ["app"]

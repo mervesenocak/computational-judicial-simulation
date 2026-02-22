@@ -1,0 +1,14 @@
+[
+  {
+    "kaynak_kimlik": "PLACEHOLDER_YARGITAY_XXXX",
+    "daire": "PLACEHOLDER - gerçek içtihat ile doldurulacak",
+    "esas_no": "PLACEHOLDER",
+    "karar_no": "PLACEHOLDER",
+    "tarih": "1900-01-01",
+    "ozet": "PLACEHOLDER – gerçek özet eklendiğinde kullanılacaktır.",
+    "ilgili_maddeler": [],
+    "anahtar_kelimeler": ["PLACEHOLDER"],
+    "metin_kisa": "PLACEHOLDER – gerçek metin eklendiğinde kullanılacaktır.",
+    "is_placeholder": true
+  }
+]

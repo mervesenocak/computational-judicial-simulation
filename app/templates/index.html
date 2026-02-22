@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Hakim Simülasyonu • Denetlenebilir Prototip</title>
+  <link rel="stylesheet" href="/static/app.css"/>
+  <style>
+    /* CSS yoksa bile güzel görünsün diye minimal fallback */
+    body{font-family: ui-sans-serif,system-ui,Segoe UI,Roboto,Arial; margin:0; background:#0b1220; color:#e8eeff;}
+    .wrap{max-width:980px; margin:40px auto; padding:0 18px;}
+    .card{background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.25);}
+    .h1{font-size:34px; font-weight:900; margin:0;}
+    .sub{color:#92a4c3; margin:10px 0 0 0; line-height:1.55;}
+    .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;}
+    @media (max-width:860px){.grid{grid-template-columns:1fr}}
+    label{display:block; font-size:12px; color:#92a4c3; margin:0 0 8px 0;}
+    input,select,textarea{width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:rgba(0,0,0,.22); color:#e8eeff; outline:none;}
+    textarea{min-height:170px; resize:vertical;}
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    .btn{padding:11px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.05); color:#e8eeff; cursor:pointer; font-weight:800;}
+    .btn.primary{background:linear-gradient(180deg, rgba(79,124,255,.95), rgba(79,124,255,.70)); border-color:rgba(79,124,255,.45);}
+    .badge{display:inline-block; padding:7px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background:rgba(0,0,0,.18); font-size:12px; color:#92a4c3; margin:6px 8px 0 0;}
+    .hr{height:1px; background:rgba(255,255,255,.10); margin:16px 0;}
+    .note{font-size:12px; color:#92a4c3; line-height:1.55;}
+    .warn{border-left:4px solid rgba(255,204,102,.70); padding:10px 12px; background:rgba(255,204,102,.08); border-radius:12px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start;">
+      <div style="flex:1 1 520px;">
+        <h1 class="h1">Hakim Simülasyonu</h1>
+        <p class="sub">
+          Denetlenebilir (audit edilebilir) hukuk-AI prototipi. Özel hukukta <b>kural temelli</b> yaklaşım, cezada <b>açıklanabilir puanlama</b>.
+          <br/>⚠️ <b>Bu hukuki tavsiye değildir.</b>
+        </p>
+        <div>
+          <span class="badge">Uydurma atıf üretmez</span>
+          <span class="badge">Kaynak yoksa “veri yok” der</span>
+          <span class="badge">Eğitim / portföy prototipi</span>
+        </div>
+      </div>
+
+      <div class="card" style="flex:0 1 320px;">
+        <div style="font-weight:900; margin-bottom:6px;">Hızlı Linkler</div>
+        <div class="row">
+          <a class="btn" href="/docs" style="text-decoration:none; display:inline-block;">Swagger</a>
+          <a class="btn" href="/openapi.json" style="text-decoration:none; display:inline-block;">OpenAPI</a>
+        </div>
+        <div class="hr"></div>
+        <div class="warn note">
+          <b>Atıf Politikası:</b> Sistem yalnızca veritabanındaki mevzuat/ictihat ile atıf yapar.
+          Placeholder veya eksik kaynak varsa karar/öneri <b>sınırlı</b> üretilir ve uyarı verir.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <form action="/api/web_analyze" method="post" enctype="multipart/form-data">
+        <div class="grid">
+          <div>
+            <label>Dava Türü</label>
+            <select id="dava_turu" name="dava_turu">
+              <option value="ozel">Özel Hukuk</option>
+              <option value="ceza">Ceza</option>
+            </select>
+            <div class="note">Rumence hazırlık + lisans hedefi için “uygulamalı/otomasyon” odaklı dosya anlatımı güçlü durur.</div>
+          </div>
+
+          <div>
+            <label>Dosya (PDF / DOCX / TXT)</label>
+            <input type="file" name="file" accept=".pdf,.docx,.txt"/>
+            <div class="note">Dosya yüklemesen de olur; metni aşağıya yapıştırabilirsin.</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <label>Olay Özeti / Metin</label>
+        <textarea id="olay_ozeti" name="olay_ozeti" placeholder="Olayı kısaca anlat. Talepler, deliller ve tarih varsa yaz."></textarea>
+
+        <div class="row">
+          <button class="btn primary" type="submit">Analiz Et</button>
+          <button class="btn" type="button" onclick="ornekOzel()">Örnek Özel Hukuk Doldur</button>
+          <button class="btn" type="button" onclick="ornekCeza()">Örnek Ceza Doldur</button>
+          <button class="btn" type="reset">Temizle</button>
+        </div>
+
+        <div class="hr"></div>
+        <div class="note">
+          <b>Nasıl çalışır?</b> Metinden anahtar kavram çıkarımı + arama → kural motoru / puanlama → gerekçeli taslak + atıflar.
+          Kaynak yoksa “veri yok” uyarısı verir.
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function ornekOzel(){
+      document.getElementById("dava_turu").value = "ozel";
+      document.getElementById("olay_ozeti").value =
+`Davacı, davalının kusurlu eylemi sonucu maddi ve manevi zarara uğradığını ileri sürmektedir.
+Olay: 12.01.2026 tarihinde taraflar arasında tartışma sonrası davalının hakaret ve itmesi nedeniyle davacı yere düşmüş, tedavi görmüştür.
+Talepler: Maddi tazminat, manevi tazminat.
+Deliller: Hastane raporu, tanık beyanları, ödeme dekontları.
+Ek: Zararın bir kısmı karşılanmış ancak tamamı giderilmemiştir.`;
+    }
+
+    function ornekCeza(){
+      document.getElementById("dava_turu").value = "ceza";
+      document.getElementById("olay_ozeti").value =
+`Sanığın kasten yaralama fiilini işlediği iddia edilmektedir.
+Deliller: Kamera görüntüsü, bilirkişi raporu, tanık beyanı.
+Fail durumu: Sabıkasız olduğu, etkin pişmanlık gösterdiği, zararı giderdiği belirtilmiştir.
+Talep: İyi hal indirimi ve lehe hükümlerin uygulanması.`;
+    }
+  </script>
+</body>
+</html>

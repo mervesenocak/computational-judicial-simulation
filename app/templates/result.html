@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Sonuç • Hakim Simülasyonu</title>
+  <link rel="stylesheet" href="/static/app.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <div>
+        <h1 class="h1">Analiz Sonucu</h1>
+        <p class="sub">
+          Aşağıdaki çıktı “açıklanabilir” şekilde üretilmiştir. Uydurma kaynak üretmez.
+        </p>
+        <div class="badges">
+          <span class="badge">case_type: {{ result.case_type }}</span>
+          <span class="badge">citations: {{ result.citations|length }}</span>
+        </div>
+      </div>
+      <div class="btns">
+        <a class="btn secondary" href="/api/web">← Geri</a>
+        <a class="btn secondary" href="/docs">Swagger</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="kpi">
+        <div class="pill">
+          <div class="t">Dava Türü</div>
+          <div class="v">{{ "Özel Hukuk" if result.case_type=="ozel" else "Ceza" }}</div>
+        </div>
+
+        {% if result.scores and result.scores.get("toplam_puan") is not none %}
+        <div class="pill">
+          <div class="t">Toplam Puan</div>
+          <div class="v">{{ result.scores.get("toplam_puan") }}</div>
+        </div>
+        {% endif %}
+
+        {% if result.scores and result.scores.get("onerilen_sonuc") %}
+        <div class="pill">
+          <div class="t">Öneri</div>
+          <div class="v">{{ result.scores.get("onerilen_sonuc") }}</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="label">Karar Metni</div>
+      <pre>{{ result.decision_text }}</pre>
+
+      {% if result.citations and result.citations|length > 0 %}
+      <div class="hr"></div>
+      <div class="label">Atıflar (Mevzuat / İçtihat)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Tür</th>
+            <th>Kaynak</th>
+            <th>Madde / Esas-Karar</th>
+            <th>Alıntı</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in result.citations %}
+          <tr>
+            <td><span class="tag ok">{{ c.kaynak_turu }}</span></td>
+            <td>
+              <div style="font-weight:800">{{ c.kanun_veya_daire }}</div>
+              <div class="small">kimlik: {{ c.kaynak_kimlik }}</div>
+            </td>
+            <td class="small">
+              {% if c.madde_no %}Madde: {{ c.madde_no }}{% endif %}
+              {% if c.esas_no or c.karar_no %}
+                <div>E: {{ c.esas_no }} / K: {{ c.karar_no }}</div>
+              {% endif %}
+              {% if c.tarih %}<div>Tarih: {{ c.tarih }}</div>{% endif %}
+            </td>
+            <td>{{ c.alinti }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+
+      {% if result.warnings and result.warnings|length > 0 %}
+      <div class="hr"></div>
+      <div class="label">Uyarılar</div>
+      <ul>
+        {% for w in result.warnings %}
+          <li class="small"><span class="tag warn">UYARI</span> {{ w }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
