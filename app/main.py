@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from app.api.routes import router
 
@@ -22,18 +23,7 @@ app.add_middleware(
 app.include_router(router, prefix="/api")
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
-    return {
-        "ok": True,
-        "ui": "http://127.0.0.1:8000/api/web",
-        "swagger": "http://127.0.0.1:8000/docs",
-        "openapi": "http://127.0.0.1:8000/openapi.json",
-    }
-def root():
-    return {
-        "ok": True,
-        "ui": "http://127.0.0.1:8000/api/web",
-        "swagger": "http://127.0.0.1:8000/docs",
-        "openapi": "http://127.0.0.1:8000/openapi.json",
-    }
+    # Live demo için ana sayfayı web arayüzüne yönlendir
+    return RedirectResponse(url="/api/web")
